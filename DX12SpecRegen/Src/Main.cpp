@@ -126,7 +126,6 @@ int safeMain([[maybe_unused]] int argc, [[maybe_unused]] const char** argv)
 					    refs.erase(refs.begin(), refs.begin() + sdkInfo.headers.size());
 					    allJobs.emplace_back(removerJob);
 				    }
-				    //break;
 			    }
 
 			    preProcessJob = currentJob.m_JobSystem->createJob(PostProcessJob { &sdkInfos }, allJobs);
