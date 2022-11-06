@@ -16,7 +16,7 @@ public:
 struct SDKVersion
 {
 public:
-	std::uint32_t major, variant, minor, patch;
+	std::string name;
 
 	std::filesystem::path    path;
 	std::vector<DXGIVersion> dxgis;

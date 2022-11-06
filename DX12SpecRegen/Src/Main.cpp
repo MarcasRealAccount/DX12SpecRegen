@@ -81,7 +81,7 @@ int safeMain([[maybe_unused]] int argc, [[maybe_unused]] const char** argv)
 			    sdkVersions = LocateAvailableSDKVersions("./");
 			    Log::Info("Found {} sdks", sdkVersions.size());
 			    for (auto& sdk : sdkVersions)
-				    Log::Info("{}.{}.{}.{} at '{}' with {} dxgis", sdk.major, sdk.variant, sdk.minor, sdk.patch, sdk.path.string(), sdk.dxgis.size());
+				    Log::Info("{} at '{}' with {} dxgis", sdk.name, sdk.path.string(), sdk.dxgis.size());
 
 			    sdkInfos.resize(sdkVersions.size(), {});
 			    std::vector<JobSystem::JobRef> refs;
@@ -89,7 +89,7 @@ int safeMain([[maybe_unused]] int argc, [[maybe_unused]] const char** argv)
 			    {
 				    auto& sdkVersion = sdkVersions[i - 1];
 				    auto& sdkInfo    = sdkInfos[i - 1];
-				    sdkInfo.version  = fmt::format("{}.{}.{}.{}", sdkVersion.major, sdkVersion.variant, sdkVersion.minor, sdkVersion.patch);
+				    sdkInfo.version  = sdkVersion.name;
 
 				    std::vector<std::string> args;
 				    args.emplace_back("-isystem");
