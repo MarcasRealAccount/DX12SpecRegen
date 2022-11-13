@@ -236,15 +236,13 @@ namespace Serialization
 	public:
 		static Type&       Get(Class& object) { return object.*Ptr; }
 		static const Type& Get(const Class& object) { return object.*Ptr; }
-		template <std::assignable_from<Type> U>
+		template <class U>
 		static Type& Set(Class& object, const U& copy)
-		    requires std::assignable_from<Type, const U&>
 		{
 			return object.*Ptr = copy;
 		}
-		template <std::assignable_from<Type> U>
+		template <class U>
 		static Type& Set(Class& object, U&& move)
-		    requires std::assignable_from<Type, U&&>
 		{
 			return object.*Ptr = std::move(move);
 		}

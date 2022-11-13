@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace Utils::UTF
+namespace Utils::Unicode
 {
 	constexpr std::uint8_t UTF8Length(std::uint8_t c)
 	{
@@ -17,12 +17,11 @@ namespace Utils::UTF
 			return 2;
 		else if (c <= 0xEF)
 			return 3;
-		else if (c <= 0xF7)
+		else
 			return 4;
-		return 0;
 	}
 
-	constexpr std::uint8_t UTF8Length(std::uint32_t codepoint)
+	constexpr std::uint8_t UTF8Length(char32_t codepoint)
 	{
 		if (codepoint <= 0x7F)
 			return 1;
@@ -47,7 +46,7 @@ namespace Utils::UTF
 		}
 	}
 
-	constexpr std::uint8_t UTF16Length(std::uint32_t codepoint)
+	constexpr std::uint8_t UTF16Length(char32_t codepoint)
 	{
 		if (codepoint <= 0xFFFF)
 			return 1;
@@ -56,7 +55,7 @@ namespace Utils::UTF
 		return 0;
 	}
 
-	constexpr std::uint32_t UTF8ToUTF32(const char* utf8, std::size_t size, std::uint8_t* pCodepointLength)
+	constexpr char32_t UTF8ToUTF32(const char* utf8, std::size_t size, std::uint8_t* pCodepointLength)
 	{
 		if (!utf8 || !size)
 		{
@@ -88,7 +87,7 @@ namespace Utils::UTF
 		}
 	}
 
-	constexpr std::uint8_t UTF32ToUTF8(std::uint32_t utf32, char* utf8, std::size_t size)
+	constexpr std::uint8_t UTF32ToUTF8(char32_t utf32, char* utf8, std::size_t size)
 	{
 		if (!utf8 || !size)
 			return 0;
@@ -123,7 +122,7 @@ namespace Utils::UTF
 		}
 	}
 
-	constexpr std::uint32_t UTF16ToUTF32(const wchar_t* utf16, std::size_t size, std::uint8_t* pCodepointLength)
+	constexpr char32_t UTF16ToUTF32(const wchar_t* utf16, std::size_t size, std::uint8_t* pCodepointLength)
 	{
 		if (!utf16 || !size)
 		{
@@ -153,7 +152,7 @@ namespace Utils::UTF
 		}
 	}
 
-	constexpr std::uint8_t UTF32ToUTF16(std::uint32_t utf32, wchar_t* utf16, std::size_t size)
+	constexpr std::uint8_t UTF32ToUTF16(char32_t utf32, wchar_t* utf16, std::size_t size)
 	{
 		if (!utf16 || !size)
 			return 0;
@@ -180,7 +179,7 @@ namespace Utils::UTF
 		}
 	}
 
-	constexpr std::size_t ConvertUTF8ToUTF32(const char* utf8, std::size_t utf8Size, std::uint32_t* utf32, std::size_t utf32Size, std::size_t& utf8Offset)
+	constexpr std::size_t ConvertUTF8ToUTF32(const char* utf8, std::size_t utf8Size, char32_t* utf32, std::size_t utf32Size, std::size_t& utf8Offset)
 	{
 		std::size_t utf32Offset = 0;
 
@@ -195,7 +194,7 @@ namespace Utils::UTF
 		return utf32Offset;
 	}
 
-	constexpr std::size_t ConvertUTF32ToUTF8(const std::uint32_t* utf32, std::size_t utf32Size, char* utf8, std::size_t utf8Size, std::size_t& utf8Offset)
+	constexpr std::size_t ConvertUTF32ToUTF8(const char32_t* utf32, std::size_t utf32Size, char* utf8, std::size_t utf8Size, std::size_t& utf8Offset)
 	{
 		std::size_t utf32Offset = 0;
 
@@ -205,7 +204,7 @@ namespace Utils::UTF
 		return utf32Offset;
 	}
 
-	constexpr std::size_t ConvertUTF16ToUTF32(const wchar_t* utf16, std::size_t utf16Size, std::uint32_t* utf32, std::size_t utf32Size, std::size_t& utf16Offset)
+	constexpr std::size_t ConvertUTF16ToUTF32(const wchar_t* utf16, std::size_t utf16Size, char32_t* utf32, std::size_t utf32Size, std::size_t& utf16Offset)
 	{
 		std::size_t utf32Offset = 0;
 
@@ -220,7 +219,7 @@ namespace Utils::UTF
 		return utf32Offset;
 	}
 
-	constexpr std::size_t ConvertUTF32ToUTF16(const std::uint32_t* utf32, std::size_t utf32Size, wchar_t* utf16, std::size_t size, std::size_t& utf16Offset)
+	constexpr std::size_t ConvertUTF32ToUTF16(const char32_t* utf32, std::size_t utf32Size, wchar_t* utf16, std::size_t size, std::size_t& utf16Offset)
 	{
 		std::size_t utf32Offset = 0;
 
@@ -271,7 +270,7 @@ namespace Utils::UTF
 		return requiredLength;
 	}
 
-	constexpr std::size_t UTF32ToUTF8RequiredLength(const std::uint32_t* utf32, std::size_t utf32Size)
+	constexpr std::size_t UTF32ToUTF8RequiredLength(const char32_t* utf32, std::size_t utf32Size)
 	{
 		std::size_t requiredLength = 0;
 		for (std::size_t offset = 0; offset < utf32Size; ++offset)
@@ -334,15 +333,15 @@ namespace Utils::UTF
 	{
 		std::u32string utf32(UTF8ToUTF32RequiredLength(utf8.data(), utf8.size()), '\0');
 		std::size_t    utf8Offset = 0;
-		ConvertUTF8ToUTF32(utf8.data(), utf8.size(), reinterpret_cast<std::uint32_t*>(utf32.data()), utf32.size(), utf8Offset);
+		ConvertUTF8ToUTF32(utf8.data(), utf8.size(), utf32.data(), utf32.size(), utf8Offset);
 		return utf32;
 	}
 
 	inline std::string ConvertUTF32ToUTF8(std::u32string_view utf32)
 	{
-		std::string utf8(UTF32ToUTF8RequiredLength(reinterpret_cast<const std::uint32_t*>(utf32.data()), utf32.size()), '\0');
+		std::string utf8(UTF32ToUTF8RequiredLength(utf32.data(), utf32.size()), '\0');
 		std::size_t utf32Offset = 0;
-		ConvertUTF32ToUTF8(reinterpret_cast<const std::uint32_t*>(utf32.data()), utf32.size(), utf8.data(), utf8.size(), utf32Offset);
+		ConvertUTF32ToUTF8(utf32.data(), utf32.size(), utf8.data(), utf8.size(), utf32Offset);
 		return utf8;
 	}
 
@@ -377,4 +376,77 @@ namespace Utils::UTF
 		ConvertUTF16ToUTF8(wide.data(), wide.size(), utf8.data(), utf8.size(), utf16Offset);
 		return utf8;
 	}
-} // namespace Utils::UTF
+
+	namespace Codepoint
+	{
+		struct Codepoint
+		{
+		public:
+			Codepoint(char c) : m_Codepoint(c) {}
+			Codepoint(char8_t c) : m_Codepoint(c) {}
+			Codepoint(char16_t c) : m_Codepoint(c) {}
+			Codepoint(char32_t c) : m_Codepoint(c) {}
+			Codepoint(wchar_t c) : m_Codepoint(c) {}
+
+			template <std::size_t N>
+			Codepoint(const char (&c)[N])
+			    : m_Codepoint(UTF8ToUTF32(c, N, nullptr))
+			{
+			}
+			template <std::size_t N>
+			Codepoint(const char8_t (&c)[N])
+			    : m_Codepoint(UTF8ToUTF32(c, N, nullptr))
+			{
+			}
+			template <std::size_t N>
+			Codepoint(const char16_t (&c)[N])
+			    : m_Codepoint(UTF16ToUTF32(c, N, nullptr))
+			{
+			}
+			template <std::size_t N>
+			Codepoint(const wchar_t (&c)[N])
+			    : m_Codepoint(UTF16ToUTF32(c, N, nullptr))
+			{
+			}
+
+			operator char32_t() const { return m_Codepoint; }
+
+			char32_t m_Codepoint;
+		};
+
+		inline bool IsWhitespace(Codepoint codepoint)
+		{
+			switch (codepoint)
+			{
+			case 0x0009:
+			case 0x000A:
+			case 0x000B:
+			case 0x000C:
+			case 0x000D:
+			case 0x0020:
+			case 0x0085:
+			case 0x00A0:
+			case 0x1680:
+			case 0x2000:
+			case 0x2001:
+			case 0x2002:
+			case 0x2003:
+			case 0x2004:
+			case 0x2005:
+			case 0x2006:
+			case 0x2007:
+			case 0x2008:
+			case 0x2009:
+			case 0x200A:
+			case 0x2028:
+			case 0x2029:
+			case 0x202F:
+			case 0x205F:
+			case 0x3000:
+				return true;
+			default:
+				return false;
+			}
+		}
+	} // namespace Codepoint
+} // namespace Utils::Unicode

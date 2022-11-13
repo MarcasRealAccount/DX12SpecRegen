@@ -1,7 +1,7 @@
 #include "BackTrace.h"
 #include "Core.h"
 #include "Exception.h"
-#include "UTFConv.h"
+#include "Unicode.h"
 
 #include <Windows.h>
 
@@ -53,13 +53,13 @@ namespace Utils
 				frame.setAddress(reinterpret_cast<void*>(symbol->Address), offset);
 
 				SourceLocation source;
-				source.setFunction(UTF::ConvertWideToUTF8(symbol->Name));
+				source.setFunction(Unicode::ConvertWideToUTF8(symbol->Name));
 
 				DWORD            column = 0;
 				IMAGEHLP_LINEW64 line {};
 				line.SizeOfStruct = sizeof(IMAGEHLP_LINEW64);
 				if (SymGetLineFromAddrW64(s_SymInitializer.m_Process, reinterpret_cast<std::uint64_t>(address), &column, &line))
-					source.setFile(UTF::ConvertWideToUTF8(line.FileName), line.LineNumber, column);
+					source.setFile(Unicode::ConvertWideToUTF8(line.FileName), line.LineNumber, column);
 
 				frame.setSource(std::move(source));
 			}

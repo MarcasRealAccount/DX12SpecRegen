@@ -30,11 +30,14 @@ namespace Serialization
 	struct XMLDocument
 	{
 	public:
-		XMLElement root;
+		std::string version  = "1.0";
+		std::string encoding = "UTF-8";
+		XMLElement  root;
 	};
 
 	std::string XMLToString(const XMLElement& element, std::size_t indent = 0);
 	std::string XMLToString(const XMLDocument& document);
+	XMLDocument StringToXML(std::string_view str);
 
 	template <class T>
 	struct XMLSerializer;
@@ -142,8 +145,8 @@ namespace Serialization
 			}
 			else
 			{
-				XMLElement* fieldElement = nullptr;
-				if constexpr (FieldProperties::Inline)
+				const XMLElement* fieldElement = nullptr;
+				if constexpr (FieldProperties::Inline == EInline::Inline)
 				{
 					fieldElement = &element;
 				}
@@ -152,10 +155,7 @@ namespace Serialization
 					auto elementItr = std::find_if(element.children.begin(), element.children.end(),
 					                               [](const XMLElement& child) -> bool
 					                               {
-						                               if constexpr (Serializable<typename TFieldInfo::Type>)
-							                               return child.tag == TFieldInfo::Type::StructInfo::Name;
-						                               else
-							                               return child.tag == TFieldInfo::Name;
+						                               return child.tag == TFieldInfo::Name;
 					                               });
 					if (elementItr == element.children.end())
 					{
@@ -164,11 +164,11 @@ namespace Serialization
 							TFieldInfo::Set(value, FieldProperties::Default);
 							return;
 						}
+						return;
 					}
 					else
 					{
-						fieldElement      = &(*elementItr);
-						fieldElement->tag = TFieldInfo::Name;
+						fieldElement = &(*elementItr);
 					}
 				}
 				else
@@ -188,14 +188,11 @@ namespace Serialization
 							TFieldInfo::Set(value, FieldProperties::Default);
 							return;
 						}
+						return;
 					}
 					else
 					{
 						fieldElement = &(*elementItr);
-						if constexpr (Serializable<typename TFieldInfo::Type>)
-							fieldElement->tag = TFieldInfo::Type::StructInfo::Name;
-						else
-							fieldElement->tag = TFieldInfo::Name;
 					}
 				}
 				serializer.Deserialize(TFieldInfo::Get(value), *fieldElement);
@@ -545,7 +542,7 @@ namespace Serialization
 			using FieldSerializer = XMLSerializer<T>;
 			for (auto& child : element.children)
 			{
-				if (child.tag == StructInfo.Name)
+				if (child.tag == StructInfo::Name)
 				{
 					auto&           val = value.emplace_back();
 					FieldSerializer serializer {};
